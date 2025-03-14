@@ -151,3 +151,176 @@ void Task(void *pvParameters) {
 }
 
 ```
+### **Function Pointer in C**
+A **function pointer** is a pointer that stores the address of a function. It allows calling functions dynamically, enabling flexibility and modularity in programming.
+
+---
+
+## **1. Why Use Function Pointers?**
+Function pointers are useful when:
+✅ **Dynamic Function Calls** → Select a function at runtime instead of compile time.  
+✅ **Callback Mechanism** → Pass a function as an argument to another function (e.g., signal handling, sorting with custom comparison).  
+✅ **Polymorphism in C** → Implement **object-oriented behavior** (like virtual functions in C++).  
+✅ **Driver Development & HAL (Hardware Abstraction Layer)** → Use function pointers in **Linux kernel, device drivers, and embedded systems** to handle multiple hardware implementations.  
+
+---
+
+## **2. Declaring & Using Function Pointers**
+### **Basic Function Pointer Example**
+```c
+#include <stdio.h>
+
+// Function to be pointed
+void greet() {
+    printf("Hello, Function Pointer!\n");
+}
+
+int main() {
+    void (*func_ptr)();  // Declare a function pointer
+    func_ptr = greet;    // Assign address of function
+    func_ptr();          // Call function using pointer
+    return 0;
+}
+```
+**Output:**
+```
+Hello, Function Pointer!
+```
+
+---
+
+## **3. Function Pointer with Parameters & Return Value**
+```c
+#include <stdio.h>
+
+int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int (*func_ptr)(int, int);  // Function pointer declaration
+    func_ptr = add;             // Assign function address
+    printf("Sum: %d\n", func_ptr(5, 10)); // Call function via pointer
+    return 0;
+}
+```
+**Output:**
+```
+Sum: 15
+```
+
+---
+
+## **4. Function Pointer in Callbacks (Real-World Example)**
+Function pointers are commonly used in **callbacks**.  
+
+### **Example: Using Function Pointer in `qsort()`**
+The C standard library function `qsort()` uses a function pointer to allow custom sorting.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b); // Ascending order
+}
+
+int main() {
+    int arr[] = { 5, 3, 7, 2, 8 };
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    qsort(arr, n, sizeof(int), compare); // qsort uses a function pointer
+
+    printf("Sorted array: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    return 0;
+}
+```
+**Output:**
+```
+Sorted array: 2 3 5 7 8
+```
+
+---
+
+## **5. Function Pointers in Structures (Used in Device Drivers)**
+Function pointers are often used in **structs** for abstraction.
+
+### **Example: Using Function Pointers in Structs**
+```c
+#include <stdio.h>
+
+typedef struct {
+    void (*start)(void);
+    void (*stop)(void);
+} DeviceDriver;
+
+void start_device() { printf("Device started\n"); }
+void stop_device() { printf("Device stopped\n"); }
+
+int main() {
+    DeviceDriver driver = { start_device, stop_device };
+    driver.start();
+    driver.stop();
+    return 0;
+}
+```
+**Output:**
+```
+Device started
+Device stopped
+```
+
+This is **widely used in Linux drivers** to define function interfaces.
+
+---
+
+## **6. Function Pointer Arrays**
+Instead of multiple `if-else` or `switch` statements, **function pointer arrays** simplify function selection.
+
+```c
+#include <stdio.h>
+
+void fun1() { printf("Function 1\n"); }
+void fun2() { printf("Function 2\n"); }
+
+int main() {
+    void (*func_arr[])() = { fun1, fun2 }; // Array of function pointers
+    func_arr[0](); // Call fun1
+    func_arr[1](); // Call fun2
+    return 0;
+}
+```
+**Output:**
+```
+Function 1
+Function 2
+```
+
+---
+
+## **7. Function Pointers in Linux Kernel & Embedded Systems**
+- **Device Drivers:** Function pointers are used to implement **hardware abstraction layers (HAL)**.
+- **Interrupt Handlers:** Function pointers are registered for **ISR (Interrupt Service Routines)**.
+- **Syscalls:** System calls in the Linux kernel use function pointers to **redirect requests dynamically**.
+
+### **Example: Using Function Pointer in a Driver**
+```c
+struct file_operations {
+    int (*open)(struct inode *, struct file *);
+    int (*read)(struct file *, char *, size_t, loff_t *);
+    int (*write)(struct file *, const char *, size_t, loff_t *);
+};
+```
+This structure is used in **Linux kernel drivers** to handle different file operations dynamically.
+
+---
+
+## **8. When to Use Function Pointers?**
+✅ **When you need a callback mechanism (e.g., `qsort()`, signal handling).**  
+✅ **When you need dynamic function selection (e.g., device drivers, HAL, function tables).**  
+✅ **When you want to replace `switch-case` with a more efficient method (function pointer arrays).**  
+✅ **When implementing polymorphism in C (e.g., defining behavior in structs for OOP-like design).**  
+
+Would you like an example specific to **FreeRTOS, Linux drivers, or embedded systems**? 🚀
