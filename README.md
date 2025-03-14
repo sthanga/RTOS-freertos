@@ -324,3 +324,357 @@ This structure is used in **Linux kernel drivers** to handle different file oper
 ✅ **When implementing polymorphism in C (e.g., defining behavior in structs for OOP-like design).**  
 
 Would you like an example specific to **FreeRTOS, Linux drivers, or embedded systems**? 🚀
+
+
+
+Here are some commonly asked **FreeRTOS interview questions**, categorized by difficulty level:
+
+---
+
+## **Basic FreeRTOS Interview Questions**
+### **1. What is FreeRTOS, and why is it used?**
+**Answer:**  
+FreeRTOS is an open-source, real-time operating system (RTOS) designed for embedded systems. It provides task scheduling, inter-task communication, and resource management, ensuring **deterministic behavior** for time-sensitive applications.
+
+---
+
+### **2. What are the key components of FreeRTOS?**
+**Answer:**  
+- **Task Scheduler** – Manages task execution based on priority.  
+- **Tasks** – Independent units of execution.  
+- **Queues** – Used for inter-task communication.  
+- **Semaphores & Mutexes** – Synchronization mechanisms.  
+- **Timers** – Software-based timing events.  
+- **Interrupt Service Routines (ISR)** – Handles external events.  
+
+---
+
+### **3. How does FreeRTOS schedule tasks?**
+**Answer:**  
+FreeRTOS uses **preemptive, cooperative, and time-slicing scheduling** based on task priorities. The highest-priority **ready state** task is always executed first.
+
+---
+
+### **4. What are the different task states in FreeRTOS?**
+**Answer:**  
+1. **Running** – Task currently executing.  
+2. **Ready** – Task ready to execute but waiting for CPU.  
+3. **Blocked** – Task waiting for an event (e.g., semaphore, queue).  
+4. **Suspended** – Task not in scheduling queue, waiting to be resumed.  
+5. **Deleted** – Task has been removed from the system.  
+
+---
+
+## **Intermediate FreeRTOS Interview Questions**
+### **5. How do you create a task in FreeRTOS?**
+```c
+xTaskCreate(vTaskFunction, "TaskName", 1000, NULL, 1, NULL);
+```
+Where:  
+- `vTaskFunction` – Function executed by the task.  
+- `"TaskName"` – Name of the task.  
+- `1000` – Stack size in words.  
+- `NULL` – Task parameters.  
+- `1` – Priority.  
+- `NULL` – Task handle (optional).  
+
+---
+
+### **6. How do you delete a task in FreeRTOS?**
+```c
+vTaskDelete(NULL); // Deletes the currently running task
+```
+
+---
+
+### **7. What is a task handle, and why is it needed?**
+**Answer:**  
+A **task handle** (`TaskHandle_t`) is used to manage a task (suspend, resume, delete). Example:
+```c
+TaskHandle_t myTask;
+xTaskCreate(vTaskFunction, "TaskName", 1000, NULL, 1, &myTask);
+vTaskDelete(myTask); // Deletes a specific task
+```
+
+---
+
+### **8. How do you handle task synchronization in FreeRTOS?**
+**Answer:**  
+- **Semaphores** (Binary, Counting) – Used to signal task execution.  
+- **Mutexes** – Used for mutual exclusion (prevent race conditions).  
+- **Event Groups** – Used for multiple event synchronization.  
+
+Example of Binary Semaphore:
+```c
+SemaphoreHandle_t xSemaphore;
+xSemaphore = xSemaphoreCreateBinary();
+xSemaphoreGive(xSemaphore); // Unlock
+xSemaphoreTake(xSemaphore, portMAX_DELAY); // Lock
+```
+
+---
+
+### **9. How do you implement inter-task communication?**
+**Answer:**  
+Using **Queues**:
+```c
+QueueHandle_t xQueue = xQueueCreate(5, sizeof(int)); 
+int data = 10;
+xQueueSend(xQueue, &data, portMAX_DELAY); // Send data
+xQueueReceive(xQueue, &data, portMAX_DELAY); // Receive data
+```
+
+---
+
+## **Advanced FreeRTOS Interview Questions**
+### **10. What is the difference between a binary semaphore and a mutex?**
+| Feature | Binary Semaphore | Mutex |
+|---------|----------------|------|
+| Purpose | Synchronization (signal between tasks) | Mutual exclusion (resource locking) |
+| Ownership | No ownership | Owned by the task that locks it |
+| Recursive | No | Yes |
+| Priority Inversion Handling | No | Yes (Priority Inheritance) |
+
+---
+
+### **11. How does FreeRTOS handle priority inversion?**
+**Answer:**  
+- Uses **priority inheritance** in **mutexes** to temporarily boost a lower-priority task’s priority if a higher-priority task is waiting on it.
+
+---
+
+### **12. What happens if a task runs indefinitely in FreeRTOS?**
+**Answer:**  
+If a task does **not yield** (`vTaskDelay()`, `vTaskDelayUntil()`, `xQueueReceive()` with timeout), **lower-priority tasks may starve**, blocking the RTOS scheduler.
+
+---
+
+### **13. How does FreeRTOS handle memory allocation?**
+**Answer:**  
+FreeRTOS provides three **memory management strategies**:
+- **heap_1.c** – Fixed-size allocation, no `free()`.
+- **heap_2.c** – Supports `malloc()` and `free()`.
+- **heap_3.c** – Uses `malloc()` and `free()` from standard C library.
+- **heap_4.c** – Best-fit memory allocation.
+
+Example:
+```c
+void *ptr = pvPortMalloc(100);  // Allocate 100 bytes
+vPortFree(ptr);  // Free allocated memory
+```
+
+---
+
+### **14. How does FreeRTOS handle software timers?**
+**Answer:**  
+Software timers allow delayed execution of functions.
+```c
+TimerHandle_t xTimer = xTimerCreate("Timer", pdMS_TO_TICKS(1000), pdTRUE, NULL, vTimerCallback);
+xTimerStart(xTimer, 0);
+```
+
+---
+
+### **15. How can you optimize power consumption in FreeRTOS?**
+**Answer:**  
+- **Use tickless idle mode (`configUSE_TICKLESS_IDLE`)** to stop the system tick in idle state.  
+- **Suspend unnecessary tasks** to reduce CPU usage.  
+- **Use event-driven programming** instead of polling loops.  
+
+---
+
+## **16. How does FreeRTOS support multi-core processors (SMP)?**
+**Answer:**  
+- FreeRTOS **Symmetric Multi-Processing (SMP)** allows tasks to run on multiple cores.
+- Tasks can be **pinned** to specific cores.
+
+Example:
+```c
+xTaskCreatePinnedToCore(vTaskFunction, "Task", 1000, NULL, 1, NULL, 1);
+```
+
+---
+
+## **Real-World Scenario Questions**
+### **17. What will happen if a FreeRTOS task calls `vTaskDelete(NULL);`?**
+**Answer:**  
+The current task will be deleted, but its stack memory will **not** be freed unless dynamically allocated.
+
+---
+
+### **18. What is a race condition, and how do you prevent it in FreeRTOS?**
+**Answer:**  
+A **race condition** occurs when multiple tasks access a shared resource without proper synchronization.  
+**Solution:** Use **mutexes, semaphores, or critical sections**:
+```c
+taskENTER_CRITICAL();
+shared_resource++;
+taskEXIT_CRITICAL();
+```
+
+---
+
+### **19. What is configTICK_RATE_HZ, and how does it affect FreeRTOS?**
+**Answer:**  
+Defines **the system tick frequency** (e.g., `1000 Hz = 1ms tick`).  
+- **Higher values** → More precise delays, but higher CPU overhead.  
+- **Lower values** → Less CPU overhead, but reduced timer precision.  
+
+---
+
+### **20. How do you debug FreeRTOS applications?**
+**Answer:**  
+- **Use `uxTaskGetSystemState()`** to inspect task states.  
+- **Enable stack overflow detection** (`configCHECK_FOR_STACK_OVERFLOW`).  
+- **Use trace tools** like FreeRTOS+Trace.
+
+---
+
+## **Conclusion**
+Mastering **task scheduling, inter-task communication, memory management, and debugging** is key for FreeRTOS-based development.
+
+Here’s a **FreeRTOS-based embedded application** that reads temperature data from an **I2C temperature sensor**, controls an **LED status indicator**, and handles **a button press** for interface interaction.  
+
+### **Features:**
+✅ Reads temperature from an I2C sensor (e.g., **LM75, TMP102**).  
+✅ Blinks an **LED** based on temperature threshold.  
+✅ Handles a **button press** (debounced) to toggle between **Celsius & Fahrenheit**.  
+✅ Uses **FreeRTOS tasks, queues, and semaphores** for efficient multitasking.  
+
+---
+
+### **🛠 FreeRTOS Concepts Used:**
+1. **Task Scheduling** – Separate tasks for temperature reading, LED control, and button handling.  
+2. **Queues** – Inter-task communication for passing temperature values.  
+3. **Semaphores** – Used for button press event handling.  
+4. **I2C Interface** – Reads temperature sensor data.  
+
+---
+
+### **📌 FreeRTOS Application Code**
+```c
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
+#include "stdio.h"
+#include "i2c_driver.h"   // Assume you have an I2C driver
+#include "gpio_driver.h"  // Assume you have GPIO functions
+
+// Constants
+#define TEMP_SENSOR_ADDR  0x48  // I2C Address (TMP102 or LM75)
+#define TEMP_THRESHOLD    30.0  // Temperature limit for LED alert
+
+// Global Variables
+QueueHandle_t tempQueue;
+SemaphoreHandle_t buttonSemaphore;
+volatile uint8_t displayFahrenheit = 0;  // Toggle between °C and °F
+
+// Function to Read Temperature (I2C)
+float readTemperature() {
+    uint8_t tempData[2];
+    i2c_read(TEMP_SENSOR_ADDR, tempData, 2);
+    int16_t rawTemp = (tempData[0] << 8) | tempData[1];
+    float temperature = rawTemp / 256.0;  // Convert to Celsius
+    return displayFahrenheit ? (temperature * 9/5) + 32 : temperature;
+}
+
+// Temperature Task
+void vTemperatureTask(void *pvParameters) {
+    float temperature;
+    while (1) {
+        temperature = readTemperature();
+        xQueueSend(tempQueue, &temperature, portMAX_DELAY);
+        vTaskDelay(pdMS_TO_TICKS(1000));  // Read every second
+    }
+}
+
+// LED Control Task
+void vLedTask(void *pvParameters) {
+    float temperature;
+    while (1) {
+        if (xQueueReceive(tempQueue, &temperature, portMAX_DELAY)) {
+            if (temperature >= TEMP_THRESHOLD) {
+                gpio_set(LED_PIN, HIGH);
+            } else {
+                gpio_set(LED_PIN, LOW);
+            }
+        }
+    }
+}
+
+// Button Interrupt Handler
+void vButtonISR() {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(buttonSemaphore, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+// Button Task
+void vButtonTask(void *pvParameters) {
+    while (1) {
+        if (xSemaphoreTake(buttonSemaphore, portMAX_DELAY)) {
+            displayFahrenheit = !displayFahrenheit;
+            printf("Display Mode: %s\n", displayFahrenheit ? "Fahrenheit" : "Celsius");
+        }
+    }
+}
+
+// Main Function
+int main(void) {
+    // Initialize Peripherals
+    i2c_init();
+    gpio_init();
+    gpio_set_interrupt(BUTTON_PIN, vButtonISR);
+
+    // Create Queue & Semaphore
+    tempQueue = xQueueCreate(5, sizeof(float));
+    buttonSemaphore = xSemaphoreCreateBinary();
+
+    // Create Tasks
+    xTaskCreate(vTemperatureTask, "TempTask", 1000, NULL, 2, NULL);
+    xTaskCreate(vLedTask, "LedTask", 1000, NULL, 2, NULL);
+    xTaskCreate(vButtonTask, "ButtonTask", 500, NULL, 1, NULL);
+
+    // Start Scheduler
+    vTaskStartScheduler();
+
+    while (1);  // Should never reach here
+}
+```
+
+---
+
+### **📌 Explanation:**
+1. **`vTemperatureTask`**  
+   - Reads temperature over **I2C** every second.  
+   - Sends data to the **Queue** for processing by the LED task.  
+
+2. **`vLedTask`**  
+   - Waits for temperature data from **Queue**.  
+   - Turns **LED ON** if temp **≥ 30°C**, otherwise **OFF**.  
+
+3. **`vButtonTask`**  
+   - Waits for **button press (Semaphore)** event.  
+   - Toggles between **Celsius & Fahrenheit** display.  
+
+4. **`vButtonISR`**  
+   - Interrupt handler for **button press** (uses **semaphore**).  
+
+---
+
+### **🔹 Key FreeRTOS Features Demonstrated**
+✔ **Task Scheduling** – Three independent tasks run in parallel.  
+✔ **Queue Usage** – Transfers temperature data between tasks.  
+✔ **Semaphore Usage** – Handles button press event efficiently.  
+✔ **I2C Communication** – Reads temperature sensor values.  
+✔ **GPIO Control** – Manages LED based on temperature.  
+✔ **ISR Handling** – Efficient button interrupt processing.  
+
+---
+
+### **🛠 Modifications You Can Try**
+🔹 Add **OLED/LCD Display** to show temperature.  
+🔹 Implement **Low Power Mode** using **Tickless Idle**.  
+🔹 Add **Logging via UART** for debugging.  
+🔹 Use **Multiple Sensors** (Humidity, Pressure).  
