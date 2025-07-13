@@ -1,4 +1,5 @@
 # Zephyr RTOS Build Procedure 
+### https://docs.zephyrproject.org/latest/develop/getting_started/index.html
 ## sudo apt update && sudo apt upgrade
 ## python3 -m venv ./zephyrproject/.venv
 ## source ./zephyrproject/.venv/bin/activate
